@@ -142,9 +142,13 @@ class Multi_Behavior_Graph_Base(Embedding):
             self.item_graph_degree[key] = self.item_graph_degree[key].to(self.device)
 
     def __param_init(self):
+        # Weight for user-item score and item-item score
+        self.sigmoid_W = nn.Parameter(torch.ones(self.embed_size * 2, 1)*self.sigmoid_weight)
+
+        # Weight for each behavior
         self.behavior_weight = nn.Parameter(torch.FloatTensor(self.behavior_weight))
 
-        # Encoding matrix for item-to-item score
+        # Encoding matrix for item-to-item score ==> 2 *embed
         self.item_behaviour_W = nn.ParameterList(
             [nn.Parameter(torch.FloatTensor(self.embed_size * 2, self.embed_size * 2)) for _ in self.behavior_weight])
         for param in self.item_behaviour_W:
@@ -159,6 +163,12 @@ class Multi_Behavior_Graph_Base(Embedding):
         # GCN Embedding encoding matrix
         self.W = nn.Parameter(torch.FloatTensor(self.embed_size, self.embed_size))
         nn.init.xavier_normal_(self.W)
+
+        # # Residual for user and item feature
+        self.user_W = nn.Parameter(torch.FloatTensor(self.embed_size, self.embed_size * 2))
+        self.item_W = nn.Parameter(torch.FloatTensor(self.embed_size, self.embed_size * 2))
+        nn.init.xavier_normal_(self.user_W)
+        nn.init.xavier_normal_(self.item_W)
 
     def forward(self, user, item):
         # node dropout on train matrix (ground true user-item purchase)
@@ -226,12 +236,16 @@ class Multi_Behavior_Graph_Base(Embedding):
         item_feature = torch.mm(train_matrix.t(), self.user_embedding)
 
         # Encoding feature
+        residual_user_feature = torch.mm(user_feature, self.user_W)
+        residual_item_feature = torch.mm(item_feature, self.item_W)
         user_feature = torch.mm(user_feature, self.W)
         item_feature = torch.mm(item_feature, self.W)
 
         # Concat feature with original embedding to avoid gradient vanishing
         user_feature = torch.cat((self.user_embedding, user_feature), dim=1)
         item_feature = torch.cat((self.item_embedding, item_feature), dim=1)
+        user_feature += residual_user_feature
+        item_feature += residual_item_feature
 
         # message dropout
         user_feature = self.message_drop(user_feature)
@@ -243,7 +257,9 @@ class Multi_Behavior_Graph_Base(Embedding):
         score1 = torch.sum(used_user_feature * used_item_feature, dim=2)
 
         # Final ranking score
-        scores = score1 + self.sigmoid_weight * score2
+        # scores = score1 + self.sigmoid_weight * score2
+        score_weight = torch.mm(user_feature, self.sigmoid_W)[user].squeeze(dim=2).expand(-1, item.shape[1])
+        scores = score1 * torch.sigmoid(score_weight) + score2 * (1 - torch.sigmoid(score_weight))
 
         # Regularization loss
         L2_loss = self.regularize(used_user_feature, used_item_feature)
@@ -302,17 +318,23 @@ class Multi_Behavior_Graph_Base(Embedding):
         item_feature = torch.mm(self.train_matrix.t(), self.user_embedding)
 
         # Encoding feature
+        residual_user_feature = torch.mm(user_feature, self.user_W)
+        residual_item_feature = torch.mm(item_feature, self.item_W)
         user_feature = torch.mm(user_feature, self.W)
         item_feature = torch.mm(item_feature, self.W)
 
         # Concat feature with original embedding to avoid gradient vanishing
         user_feature = torch.cat((self.user_embedding, user_feature), dim=1)
         item_feature = torch.cat((self.item_embedding, item_feature), dim=1)
+        user_feature += residual_user_feature
+        item_feature += residual_item_feature
 
         tmp_user_feature = user_feature[users]
         score1 = torch.mm(tmp_user_feature, item_feature.t())
 
         # Final ranking score for a user
-        scores = score1 + self.sigmoid_weight * score2
+        # scores = score1 + self.sigmoid_weight * score2
+        score_weight = torch.mm(user_feature, self.sigmoid_W)[users]
+        scores = score1 * torch.sigmoid(score_weight) + score2 * (1 - torch.sigmoid(score_weight))
 
         return scores

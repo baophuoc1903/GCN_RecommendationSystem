@@ -13,10 +13,10 @@ def args_parser():
     parser.add_argument('--pretrain_path', default='./run_larger/best_MF_model.pth', help="Path to pretrain embedding")
 
     parser.add_argument('--embedding_size', type=int, default=256, help="Embedding size")
-    parser.add_argument('--message_dropout', default=0.0, type=float, help="Percent of message to drop")
-    parser.add_argument('--node_dropout', default=0.0, type=float, help="Percent of user-item node to drop")
-    parser.add_argument('--sigmoid_weight', default=1.0, type=float, help="Weight for final score calculation")
-    parser.add_argument('--regularize_weight', type=float, default=0.0, help="Regularization weight")
+    parser.add_argument('--message_dropout', default=0.1, type=float, help="Percent of message to drop")
+    parser.add_argument('--node_dropout', default=0.1, type=float, help="Percent of user-item node to drop")
+    parser.add_argument('--sigmoid_weight', default=0.85, type=float, help="Weight for final score calculation")
+    parser.add_argument('--regularize_weight', type=float, default=0.0001, help="Regularization weight")
     parser.add_argument('--loss_mode', default='sum', choices={"mean", "sum"}, help="Type of loss reducer")
 
     parser.add_argument('--behaviors', default=["pv", "buy", "cart", "fav"], type=list, nargs="+",
@@ -28,11 +28,11 @@ def args_parser():
                         help="Name of dataset that is subdirectory in data_path")
 
     # Training hyperparameter
-    parser.add_argument('--epoch', type=int, default=1500, help="Number of training epochs")
-    parser.add_argument('--next_sample', type=int, default=50,
+    parser.add_argument('--epoch', type=int, default=500, help="Number of training epochs")
+    parser.add_argument('--next_sample', type=int, default=1,
                         help="Number of epoch after change to next data sample to continue training")
     parser.add_argument('--opt', type=str, default='adam', help="Optimization")
-    parser.add_argument('--lr', type=float, default=1e-3, help="Learning rate")
+    parser.add_argument('--lr', type=float, default=1e-4, help="Learning rate")
     parser.add_argument('--gpu', action="store_false", help="Not using gpu?")
 
     parser.add_argument('--batch_size', type=int, default=256*4, help="Batch size")

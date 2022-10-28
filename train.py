@@ -6,8 +6,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from Dataset import CustomDataset, ValidationDataset
 from model import MF, Multi_Behavior_Graph_Base
-from loss import bpr_loss
-from metrics import Recall, NDCG
+from utils.loss import bpr_loss
+from utils.metrics import Recall, NDCG
 
 BIGNUM = 1e8
 
@@ -89,6 +89,8 @@ class Training(object):
         print("Testing")
         self.validation(self.test_dl, task="Test evaluation")
 
+        print(f"Weight for each score: {self.model.sigmoid_weight}")
+
     def train_one_epoch(self, epoch):
         self.model.train()
         # if self.hyps.model_name == 'MBGB':
@@ -138,7 +140,7 @@ class Training(object):
             if not os.path.exists(self.hyps.output_path):
                 os.mkdir(self.hyps.output_path)
             torch.save(self.model.state_dict(),
-                       os.path.join(self.hyps.output_path, f'best_{self.hyps.model_name}_model.pth'))
+                       os.path.join(self.hyps.output_path, f'best_{self.hyps.model_name}_model_with_both.pth'))
 
 
 if __name__ == '__main__':
