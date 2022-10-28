@@ -1,5 +1,5 @@
-./Dataset/taobao
-./Dataset/taobao_larger
-./run
-./run_larger
-./drafft.py
+Dataset/taobao/
+Dataset/taobao_larger/
+drafft.py
+run/
+run_larger/
