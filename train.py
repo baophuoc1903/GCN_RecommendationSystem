@@ -8,6 +8,7 @@ from Dataset import CustomDataset, ValidationDataset
 from model import MF, Multi_Behavior_Graph_Base
 from utils.loss import bpr_loss
 from utils.metrics import Recall, NDCG
+from utils.logger import Logger
 
 BIGNUM = 1e8
 
@@ -44,6 +45,9 @@ class Training(object):
         self.max_metric = -1.0
         self.max_epoch = -1
         self.patience = 0
+
+        self.logger_recall = Logger(self.hyps, name="Recall@10")
+        self.logger_ndcg = Logger(self.hyps, name="NDCG@10")
 
     def set_device(self, hyps):
         if hyps.gpu:
@@ -89,7 +93,8 @@ class Training(object):
         print("Testing")
         self.validation(self.test_dl, task="Test evaluation")
 
-        print(f"Weight for each score: {self.model.sigmoid_weight}")
+        self.logger_recall.write_log()
+        self.logger_ndcg.write_log()
 
     def train_one_epoch(self, epoch):
         self.model.train()
@@ -126,6 +131,8 @@ class Training(object):
         for metric in self.metrics_dict:
             self.metrics_dict[metric].stop()
 
+        self.logger_recall.read_log(self.metrics_dict[self.logger_recall.name]._metric)
+        self.logger_ndcg.read_log(self.metrics_dict[self.logger_ndcg.name]._metric)
         print(("{:<20}" * len(self.metrics_dict)).format(*list(self.metrics_dict.keys())))
         print(("{:<20.8f}" * len(self.metrics_dict)).format(*[val._metric for val in list(self.metrics_dict.values())]))
 
@@ -140,7 +147,7 @@ class Training(object):
             if not os.path.exists(self.hyps.output_path):
                 os.mkdir(self.hyps.output_path)
             torch.save(self.model.state_dict(),
-                       os.path.join(self.hyps.output_path, f'best_{self.hyps.model_name}_model_with_both.pth'))
+                       os.path.join(self.hyps.output_path, f'best_{self.hyps.model_name}_tuning.pth'))
 
 
 if __name__ == '__main__':
