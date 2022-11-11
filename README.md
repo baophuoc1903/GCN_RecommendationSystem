@@ -7,7 +7,7 @@ behavior Recommendation](https://drive.google.com/file/d/16ri78dOC1AdplyAHyw7Fqk
 ## Project member:
 - Nguyen Bao Phuoc
 - Duong Thuy Trang
-
+- Instructor: Phan Duy Hung
 
 ## Requirement
 
