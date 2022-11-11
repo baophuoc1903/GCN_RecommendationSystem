@@ -1,11 +1,12 @@
 # DBP391 Project 
 This is the implementation of our project for subject DBP391 - FPT University:
 
-[Graph base multi-behavior recommendation system](https://docs.google.com/document/d/1xSgXeuxwYePKe9MaftjsNtmn-YjomvT4H8zT1UVCLuw/edit)
+[An Improvement of Graph Neural Network for Multi-
+behavior Recommendation](https://drive.google.com/file/d/16ri78dOC1AdplyAHyw7FqkIelfmEJWPY/view)
 
-## Project member: 
-- Duong Thuy Trang (Leader)
-- Nguyen Bao Phuoc (Developer)
+## Project member:
+- Nguyen Bao Phuoc
+- Duong Thuy Trang
 
 
 ## Requirement
