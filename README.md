@@ -47,7 +47,7 @@ python main.py
 *Note: See more hyperparameter in main.py to tuning model if you want*
 
 ## Reference
-[List in our project report](https://docs.google.com/document/d/1xSgXeuxwYePKe9MaftjsNtmn-YjomvT4H8zT1UVCLuw/edit)
+[List in our project report](https://drive.google.com/file/d/16ri78dOC1AdplyAHyw7FqkIelfmEJWPY/view)
 
 
 
